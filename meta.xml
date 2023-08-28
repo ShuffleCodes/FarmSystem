@@ -1,4 +1,5 @@
 <meta>
+    <script src="update.luac"/>
     <script src="settings.lua" type="shared"/>
     <script src="c.lua" type="client" cache="false"/>
     <script src="shop.lua" type="client" cache="false"/>
