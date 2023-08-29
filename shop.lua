@@ -112,7 +112,6 @@ addEventHandler("removeTarget:Cow", root, function()
 end)
 
 function keyShop(b, s)
-    --TO MASZ ZROBIC - SCROOL
     if b == "mouse_wheel_down" and s then
         if #shop.elements > 4 then
             if shop.offset < #shop.elements - 4 then
@@ -128,6 +127,7 @@ end
 
 addEventHandler("onClientResourceStart", resourceRoot, function()
     shop_marker = createMarker(shop_pos[1], shop_pos[2],shop_pos[3], "cylinder", 2, 255, 255, 255, 50)
+    createBlipAttachedTo(shop_marker, 52, 2)
 end)
 
 
