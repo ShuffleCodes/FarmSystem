@@ -24,7 +24,7 @@ function init(element)
                     data = {name = v["Name"], id = v["ID"], owned = true, price = v["Cena"], count = w2[1]["Count"], slots = v["Slots"], type = v["Type"], exit = {x,y,z}, water = w2[1]["Water"], milk = w2[1]["Milk"], spawn = {sx,sy,sz}}
                 end
                 
-                triggerClientEvent("import:Data:Farm", element, v["Pos"], data)
+                triggerClientEvent(element, "import:Data:Farm", resourceRoot, v["Pos"], data)
             end
         end
     end
@@ -36,20 +36,23 @@ end)
 
 
 addEvent("tpTo:Farm", true)
-addEventHandler("tpTo:Farm", root, function(id, x, y, z, dim, typefarm)
-    setElementPosition(source, x, y + 1, z+1)
-    setElementDimension(source, tonumber(dim))
-    local q = dbQuery(db, "SELECT * FROM Cows WHERE Farm = ? AND Serial = ?", id, getPlayerSerial(source))
+addEventHandler("tpTo:Farm", resourceRoot, function(id, x, y, z, dim, typefarm)
+    if not isElement(client) then return end
+    setElementPosition(client, x, y + 1, z+1)
+    setElementDimension(client, tonumber(dim))
+    
+    local q = dbQuery(db, "SELECT * FROM Cows WHERE Farm = ? AND Serial = ?", id, getPlayerSerial(client))
     local w = dbPoll(q, -1)
-    setTimer(function(source, w, id, typefarm)
-        triggerClientEvent("tpTo:Farm", source, w, id, typefarm)
-    end,600, 1, source, w, id, typefarm)
+    setTimer(function(client, w, id, typefarm)
+        triggerClientEvent(client, "tpTo:Farm", resourceRoot, w, id, typefarm)
+    end,600, 1,client, w, id, typefarm)
 end)
 
 addEvent("tpTo:Out", true)
-addEventHandler("tpTo:Out", root, function(x,y,z)
-    setElementPosition(source, x,y,z)
-    setElementDimension(source, 0)
+addEventHandler("tpTo:Out", resourceRoot, function(x,y,z)
+    if not isElement(client) then return end
+    setElementPosition(client, x,y,z)
+    setElementDimension(client, 0)
 end)
 
 
@@ -60,8 +63,9 @@ end)
 
 
 addEvent("buyNew:Farm", true)
-addEventHandler("buyNew:Farm", root, function(id, price, cowprice)
-    takePlayerMoney(source, tonumber(price))
+addEventHandler("buyNew:Farm", resourceRoot, function(id, price, cowprice)
+    if not isElement(client) then return end
+    takePlayerMoney(client, tonumber(price))
     local q = dbQuery(db, "SELECT * FROM Farms WHERE ID = ?", id)
     local w = dbPoll(q, -1)
     if #w > 0 then
@@ -69,36 +73,39 @@ addEventHandler("buyNew:Farm", root, function(id, price, cowprice)
     else
         cowprice = cash_per_cow
     end
-    dbExec(db,"INSERT INTO Owners (Serial, ID, Count, Water, Milk, Cow_Price) VALUES (?,?,0, 0, 0, ?)", getPlayerSerial(source), id, cowprice)
-    outputChatBox("Zakup farmy #"..id.." przebiegł pomyślnie! Zacznij od uzupełnienia wody w zbiorniku.", source, 255, 255, 255)
+    dbExec(db,"INSERT INTO Owners (Serial, ID, Count, Water, Milk, Cow_Price) VALUES (?,?,0, 0, 0, ?)", getPlayerSerial(client), id, cowprice)
+    outputChatBox("Zakup farmy #"..id.." przebiegł pomyślnie! Zacznij od uzupełnienia wody w zbiorniku.", client, 255, 255, 255)
 end)
 
 
 addEvent("dojenie:Farm", true)
-addEventHandler("dojenie:Farm", root, function(data, minus_milk, plus_farm)
+addEventHandler("dojenie:Farm", resourceRoot, function(data, minus_milk, plus_farm)
+    if not isElement(client) then return end
     if data then
-        dbExec(db,"UPDATE Owners SET Milk = Milk + ? WHERE Serial = ? AND ID = ?", (plus_farm/4), getPlayerSerial(source), data.farm)
+        dbExec(db,"UPDATE Owners SET Milk = Milk + ? WHERE Serial = ? AND ID = ?", (plus_farm/4), getPlayerSerial(client), data.farm)
         dbExec(db,"UPDATE Cows SET Milk = Milk - ? WHERE ID = ?", minus_milk, data.id)
     end
 end)
 
 addEvent("transMilk:Farm", true)
-addEventHandler("transMilk:Farm", root, function(pos, id)
-    vehs[source] = createVehicle(515, pos[1], pos[2], pos[3] + 0.5)
-    trailers[source] = createVehicle(584, 0, 0, 1)
-    attachTrailerToVehicle(vehs[source], trailers[source])
-    warpPedIntoVehicle(source, vehs[source])
-    dbExec(db,"UPDATE Owners SET Milk = 0 WHERE ID = ? AND Serial = ?", id, getPlayerSerial(source))
-    type_trans[source] = "milk"
+addEventHandler("transMilk:Farm", resourceRoot, function(pos, id)
+    if not isElement(client) then return end
+    vehs[client] = createVehicle(515, pos[1], pos[2], pos[3] + 0.5)
+    trailers[client] = createVehicle(584, 0, 0, 1)
+    attachTrailerToVehicle(vehs[client], trailers[client])
+    warpPedIntoVehicle(client, vehs[client])
+    dbExec(db,"UPDATE Owners SET Milk = 0 WHERE ID = ? AND Serial = ?", id, getPlayerSerial(client))
+    type_trans[client] = "milk"
 end)
 
 addEvent("transWater:Farm", true)
-addEventHandler("transWater:Farm", root, function(target, pos, id)
-    vehs[source] = createVehicle(515, pos[1], pos[2], pos[3] + 0.5)
-    trailers[source] = createVehicle(584, 0, 0, 1)
-    attachTrailerToVehicle(vehs[source], trailers[source])
-    warpPedIntoVehicle(source, vehs[source])
-    type_trans[source] = "water"
+addEventHandler("transWater:Farm", resourceRoot, function(target, pos, id)
+    if not isElement(client) then return end
+    vehs[client] = createVehicle(515, pos[1], pos[2], pos[3] + 0.5)
+    trailers[client] = createVehicle(584, 0, 0, 1)
+    attachTrailerToVehicle(vehs[client], trailers[client])
+    warpPedIntoVehicle(client, vehs[client])
+    type_trans[client] = "water"
 end)
 
 addEventHandler("onVehicleStartExit", root, function(plr, seat)
@@ -186,37 +193,39 @@ addEventHandler("onVehicleStartExit", root, function(plr, seat)
 end)
 
 addEvent("destroyCar:Milk", true)
-addEventHandler("destroyCar:Milk", root, function(milk)
-    if isElement(vehs[source]) then
-        destroyElement(vehs[source])
+addEventHandler("destroyCar:Milk", resourceRoot, function(milk)
+    if not isElement(client) then return end
+    if isElement(vehs[client]) then
+        destroyElement(vehs[client])
     end
-    if isElement(trailers[source]) then
-        destroyElement(trailers[source])
+    if isElement(trailers[client]) then
+        destroyElement(trailers[client])
     end
-    givePlayerMoney(source, tonumber(milk) * tonumber(cash_per_liter))
-    outputChatBox("Wywóz mleka zakończony! Za "..milk.."/100% zbiornika otrzymujesz "..(tonumber(milk) * tonumber(cash_per_liter)).."$!", source, 255, 255, 255)
+    givePlayerMoney(client, tonumber(milk) * tonumber(cash_per_liter))
+    outputChatBox("Wywóz mleka zakończony! Za "..milk.."/100% zbiornika otrzymujesz "..(tonumber(milk) * tonumber(cash_per_liter)).."$!", client, 255, 255, 255)
     if tp_after_milk then
-        local pos = getElementData(source,"Target:Data:Milk").exit
-        setTimer(function(source, pos)
+        local pos = getElementData(client,"Target:Data:Milk").exit
+        setTimer(function(client, pos)
             if pos then
-                setElementPosition(source, pos[1], pos[2], pos[3])
+                setElementPosition(client, pos[1], pos[2], pos[3])
             end
-        end, 700, 1, source, pos)
+        end, 700, 1, client, pos)
     end
-    removeElementData(source,"Target:Data:Milk")
+    removeElementData(client,"Target:Data:Milk")
 end)
 
 addEvent("destroyCar:Water", true)
-addEventHandler("destroyCar:Water", root, function()
-    if isElement(vehs[source]) then
-        destroyElement(vehs[source])
+addEventHandler("destroyCar:Water", resourceRoot, function()
+    if not isElement(client) then return end
+    if isElement(vehs[client]) then
+        destroyElement(vehs[client])
     end
-    if isElement(trailers[source]) then
-        destroyElement(trailers[source])
+    if isElement(trailers[client]) then
+        destroyElement(trailers[client])
     end
-    local water_data = getElementData(source, "Target:Data:Water")
-    dbExec(db,"UPDATE Owners SET Water = 100 WHERE ID = ? AND Serial = ?", water_data.id, getPlayerSerial(source))
-    removeElementData(source,"Target:Data:Milk")
+    local water_data = getElementData(client, "Target:Data:Water")
+    dbExec(db,"UPDATE Owners SET Water = 100 WHERE ID = ? AND Serial = ?", water_data.id, getPlayerSerial(client))
+    removeElementData(client,"Target:Data:Milk")
 end)
 
 
@@ -248,7 +257,7 @@ local function fillCowMilk()
                     dbExec(db,"UPDATE Owners SET Water = Water - ? WHERE ID = ? AND Serial = ?", water_set, v["Farm"], v["Serial"])
                     for _,p in ipairs(getElementsByType("player"))do
                         if getPlayerSerial(p) == v["Serial"] then
-                            triggerClientEvent("updateFarm:GenerateMilk", p, v["Farm"], water_set, v["Serial"])
+                            triggerClientEvent(p, "updateFarm:GenerateMilk", resourceRoot, v["Farm"], water_set, v["Serial"])
                         end
                     end
                 else
@@ -265,56 +274,59 @@ setTimer(fillCowMilk, time_generate_milk * 1000, 0)
 
 
 addEvent("openShop:Farm", true)
-addEventHandler("openShop:Farm", root, function()
-    local q = dbQuery(db, "SELECT * FROM Owners WHERE Serial = ?", getPlayerSerial(source))
+addEventHandler("openShop:Farm", resourceRoot, function()
+    if not isElement(client) then return end
+    local q = dbQuery(db, "SELECT * FROM Owners WHERE Serial = ?", getPlayerSerial(client))
     local w = dbPoll(q, -1)
-    triggerClientEvent("openShop:Farm", source, w)
+    triggerClientEvent(client, "openShop:Farm", resourceRoot, w)
 end)
 
 addEvent("buyCow:Farm", true)
-addEventHandler("buyCow:Farm", root, function(data)
+addEventHandler("buyCow:Farm", resourceRoot, function(data)
+    if not isElement(client) then return end
     local q = dbQuery(db, "SELECT * FROM Farms WHERE ID = ?", data.ID)
     local w = dbPoll(q, -1)
     if #w > 0 then
-        local x = dbQuery(db,"SELECT * FROM Owners WHERE ID = ? AND Serial =?", data.ID, getPlayerSerial(source))
+        local x = dbQuery(db,"SELECT * FROM Owners WHERE ID = ? AND Serial =?", data.ID, getPlayerSerial(client))
         local d = dbPoll(x, -1)
         if (d[1].Count < w[1].Slots) then
-            if getPlayerMoney(source) < data.Cow_Price then
-                outputChatBox("Nie posiadasz "..(data.Cow_Price).." $ gotówki na zakup tej krowy!", source, 255, 255, 255)
+            if getPlayerMoney(client) < data.Cow_Price then
+                outputChatBox("Nie posiadasz "..(data.Cow_Price).." $ gotówki na zakup tej krowy!", client, 255, 255, 255)
                 return
             end
-            takePlayerMoney(source, data.Cow_Price)
-            vehs[source] = createVehicle(455, shop_car_pos[1], shop_car_pos[2], shop_car_pos[3])
-            type_trans[source] = "cow"
-            setVehicleVariant(vehs[source], 255, 255)
-            warpPedIntoVehicle(source, vehs[source])
-            obj[source] = createObject(11470, shop_car_pos[1], shop_car_pos[2], shop_car_pos[3])
-            setObjectScale(obj[source], 0.3)
-            setElementCollisionsEnabled(obj[source], false)
-            setTimer(function(source)
-                attachElements(obj[source], vehs[source], 0, -2, 1)
-            end, 600, 1, source)
-            triggerClientEvent("closeShop:Farm", source, w[1].Spawn, data.ID)
+            takePlayerMoney(client, data.Cow_Price)
+            vehs[client] = createVehicle(455, shop_car_pos[1], shop_car_pos[2], shop_car_pos[3])
+            type_trans[client] = "cow"
+            setVehicleVariant(vehs[client], 255, 255)
+            warpPedIntoVehicle(client, vehs[client])
+            obj[client] = createObject(11470, shop_car_pos[1], shop_car_pos[2], shop_car_pos[3])
+            setObjectScale(obj[client], 0.3)
+            setElementCollisionsEnabled(obj[client], false)
+            setTimer(function(client)
+                attachElements(obj[client], vehs[client], 0, -2, 1)
+            end, 600, 1, client)
+            triggerClientEvent(client, "closeShop:Farm", resourceRoot, w[1].Spawn, data.ID)
         else
-            outputChatBox("Ta farma jest pełna! Wybierz inną docelową farmę, do której chcesz dokupić krowę!", source, 255, 255, 255)
+            outputChatBox("Ta farma jest pełna! Wybierz inną docelową farmę, do której chcesz dokupić krowę!", client, 255, 255, 255)
         end
     else
-        outputChatBox("Wystąpił nieznany błąd - kod błędu : 9004. Zgłoś to administratorowi!", source, 255, 255, 255)
+        outputChatBox("Wystąpił nieznany błąd - kod błędu : 9004. Zgłoś to administratorowi!", client, 255, 255, 255)
     end
 end)
 
 
 addEvent("destroyCar:Cow", true)
-addEventHandler("destroyCar:Cow", root, function(id)
-    if isElement(vehs[source]) then
-        destroyElement(vehs[source])
+addEventHandler("destroyCar:Cow", resourceRoot, function(id)
+    if not isElement(client) then return end
+    if isElement(vehs[client]) then
+        destroyElement(vehs[client])
     end
-    if isElement(obj[source]) then
-        destroyElement(obj[source])
+    if isElement(obj[client]) then
+        destroyElement(obj[client])
     end
-    outputChatBox("Dowiozłeś krowę pomyślnie! Jeśli woda w zbiorniku jest uzupełniona, natychmiast zacznie generować mleko.", source, 255, 255, 255)
-    dbExec(db,"UPDATE Owners SET Count = Count + 1 WHERE ID = ? AND Serial = ?", id, getPlayerSerial(source))
-    dbExec(db,"INSERT INTO Cows (ID, Serial, Milk, Farm, Fail) VALUES (?,?,0,?,0)", math.random(100000,999999), getPlayerSerial(source), id)
+    outputChatBox("Dowiozłeś krowę pomyślnie! Jeśli woda w zbiorniku jest uzupełniona, natychmiast zacznie generować mleko.", client, 255, 255, 255)
+    dbExec(db,"UPDATE Owners SET Count = Count + 1 WHERE ID = ? AND Serial = ?", id, getPlayerSerial(client))
+    dbExec(db,"INSERT INTO Cows (ID, Serial, Milk, Farm, Fail) VALUES (?,?,0,?,0)", math.random(100000,999999), getPlayerSerial(client), id)
 end)
 
 

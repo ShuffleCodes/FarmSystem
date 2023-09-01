@@ -54,60 +54,56 @@ function clickShop(button, state)
                 return
             end
             local i = shop.selected + shop.offset
-            triggerServerEvent("buyCow:Farm", localPlayer, shop.elements[i])
+            triggerServerEvent("buyCow:Farm", resourceRoot, shop.elements[i])
         end
     end
 end 
 
 addEvent("closeShop:Farm", true)
-addEventHandler("closeShop:Farm", root, function(positions, id)
-    if source == localPlayer then
-        local x,y,z = positions:match("([-0-9.]+),%s*([-0-9.]+),%s*([-0-9.]+)")
-        toggleControl("fire", true)
-        showCursor(false)
-        removeEventHandler("onClientRender", root, shopRender)
-        removeEventHandler("onClientClick", root, clickShop)
-        removeEventHandler("onClientKey", root, keyShop)
-        toggleControl("fire", true)
-        shop.elements = {}
-        shop.offset = 0
-        shop.selected = null
-        target_cow = createMarker(x,y,z, "cylinder", 3, 255, 255, 255, 50)
-        cow_blip = createBlipAttachedTo(target_cow, 41, 2)
-        addEventHandler("onClientMarkerHit", target_cow, function(el)
-            if el == localPlayer then
-                if getElementType(el) == "player" then
-                    if isElement(target_cow) then
-                        destroyElement(target_cow)
-                    end
-                    if isElement(cow_blip) then
-                        destroyElement(cow_blip)
-                    end
-                    triggerServerEvent("destroyCar:Cow", el, id)
-                    for _,v in ipairs(getElementsByType("marker"))do
-                        if getElementData(v,"Farm:Data") then
-                            local data = getElementData(v,"Farm:Data")
-                            if data.id == id then
-                                data["count"] = data["count"] + 1
-                                setElementData(v,"Farm:Data", data)
-                            end
+addEventHandler("closeShop:Farm", resourceRoot, function(positions, id)
+    local x,y,z = positions:match("([-0-9.]+),%s*([-0-9.]+),%s*([-0-9.]+)")
+    toggleControl("fire", true)
+    showCursor(false)
+    removeEventHandler("onClientRender", root, shopRender)
+    removeEventHandler("onClientClick", root, clickShop)
+    removeEventHandler("onClientKey", root, keyShop)
+    toggleControl("fire", true)
+    shop.elements = {}
+    shop.offset = 0
+    shop.selected = null
+    target_cow = createMarker(x,y,z, "cylinder", 3, 255, 255, 255, 50)
+    cow_blip = createBlipAttachedTo(target_cow, 41, 2)
+    addEventHandler("onClientMarkerHit", target_cow, function(el)
+        if el == localPlayer then
+            if getElementType(el) == "player" then
+                if isElement(target_cow) then
+                    destroyElement(target_cow)
+                end
+                if isElement(cow_blip) then
+                    destroyElement(cow_blip)
+                end
+                triggerServerEvent("destroyCar:Cow", resourceRoot, id)
+                for _,v in ipairs(getElementsByType("marker"))do
+                    if getElementData(v,"Farm:Data") then
+                        local data = getElementData(v,"Farm:Data")
+                        if data.id == id then
+                            data["count"] = data["count"] + 1
+                            setElementData(v,"Farm:Data", data)
                         end
                     end
                 end
             end
-        end)
-    end
+        end
+    end)
 end)
 
 addEvent("removeTarget:Cow", true)
-addEventHandler("removeTarget:Cow", root, function()
-    if source == localPlayer then
-        if isElement(target_cow) then
-            destroyElement(target_cow)
-        end
-        if isElement(cow_blip) then
-            destroyElement(cow_blip)
-        end
+addEventHandler("removeTarget:Cow", resourceRoot, function()
+    if isElement(target_cow) then
+        destroyElement(target_cow)
+    end
+    if isElement(cow_blip) then
+        destroyElement(cow_blip)
     end
 end)
 
@@ -137,7 +133,7 @@ addEventHandler("onClientMarkerHit", root, function(el)
         if el and el == localPlayer then
             if getElementType(el) == "player" then
                 if not getPedOccupiedVehicle(el) then
-                    triggerServerEvent("openShop:Farm", el)
+                    triggerServerEvent("openShop:Farm", resourceRoot)
                 end
             end
         end
@@ -145,15 +141,13 @@ addEventHandler("onClientMarkerHit", root, function(el)
 end)
 
 addEvent("openShop:Farm", true)
-addEventHandler("openShop:Farm", root, function(db)
-    if source == localPlayer then
-        shop.elements = db
-        showCursor(true, false)
-        addEventHandler("onClientRender", root, shopRender)
-        addEventHandler("onClientClick", root, clickShop)
-        addEventHandler("onClientKey", root, keyShop)
-        toggleControl("fire", false)
-    end
+addEventHandler("openShop:Farm", resourceRoot, function(db)
+    shop.elements = db
+    showCursor(true, false)
+    addEventHandler("onClientRender", root, shopRender)
+    addEventHandler("onClientClick", root, clickShop)
+    addEventHandler("onClientKey", root, keyShop)
+    toggleControl("fire", false)
 end)
 
 addEventHandler("onClientMarkerLeave", root, function(el)
