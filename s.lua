@@ -30,7 +30,9 @@ function init(element)
     end
 end
 
-
+addCommandHandler("init", function(plr)
+    init(plr)
+end)
 
 
 addEvent("tpTo:Farm", true)
@@ -54,6 +56,11 @@ addEventHandler("tpTo:Out", resourceRoot, function(x,y,z)
 end)
 
 
+addCommandHandler("tp", function(plr)
+    setElementPosition(plr, -2412.71924, -608.77301, 132.59628)
+    setElementDimension(plr, 0)
+end)
+
 
 addEvent("buyNew:Farm", true)
 addEventHandler("buyNew:Farm", resourceRoot, function(id, price, cowprice)
@@ -75,6 +82,8 @@ addEvent("dojenie:Farm", true)
 addEventHandler("dojenie:Farm", resourceRoot, function(data, minus_milk, plus_farm)
     if not isElement(client) then return end
     if data then
+        plus_farm = tonumber(plus_farm)
+        minus_milk = tonumber(minus_milk)
         dbExec(db,"UPDATE Owners SET Milk = Milk + ? WHERE Serial = ? AND ID = ?", (plus_farm/4), getPlayerSerial(client), data.farm)
         dbExec(db,"UPDATE Cows SET Milk = Milk - ? WHERE ID = ?", minus_milk, data.id)
     end
@@ -235,6 +244,12 @@ local function fillCowMilk()
     local w = dbPoll(q, -1)
     if #w > 0 then
         for _,v in ipairs(w) do
+            local player
+            for _, find in ipairs(getElementsByType("player"))do
+                if getPlayerSerial(find) == v["Serial"] then
+                    player = find
+                end
+            end
             local f = dbQuery(db, "SELECT * FROM Owners WHERE Serial = ? AND ID = ?", v["Serial"], v["Farm"])
             local x = dbPoll(f, -1)
             if x[1]["Water"] > 0 then
@@ -245,6 +260,9 @@ local function fillCowMilk()
                     else
                         milk_set = v["Milk"] + how_much_milk
                         water_set = how_much_water
+                    end
+                    if player then
+                        triggerClientEvent(player, "updateCow:Farm", resourceRoot, milk_set, v["ID"])
                     end
                     dbExec(db,"UPDATE Cows SET Milk = ?, Fail = 0 WHERE ID = ?", milk_set, v["ID"])
                     dbExec(db,"UPDATE Owners SET Water = Water - ? WHERE ID = ? AND Serial = ?", water_set, v["Farm"], v["Serial"])

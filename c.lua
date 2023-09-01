@@ -51,6 +51,17 @@ local maxDistance = 20
 local minScale = 0.5
 local maxScale = 1.0
 
+function dxDrawRoundedRectangle(x, y, width, height, radius, color, postGUI, subPixelPositioning)
+    dxDrawRectangle(x+radius, y+radius, width-(radius*2), height-(radius*2), color, postGUI, subPixelPositioning)
+    dxDrawCircle(x+radius, y+radius, radius, 180, 270, color, color, 16, 1, postGUI)
+    dxDrawCircle(x+radius, (y+height)-radius, radius, 90, 180, color, color, 16, 1, postGUI)
+    dxDrawCircle((x+width)-radius, (y+height)-radius, radius, 0, 90, color, color, 16, 1, postGUI)
+    dxDrawCircle((x+width)-radius, y+radius, radius, 270, 360, color, color, 16, 1, postGUI)
+    dxDrawRectangle(x, y+radius, radius, height-(radius*2), color, postGUI, subPixelPositioning)
+    dxDrawRectangle(x+radius, y+height-radius, width-(radius*2), radius, color, postGUI, subPixelPositioning)
+    dxDrawRectangle(x+width-radius, y+radius, radius, height-(radius*2), color, postGUI, subPixelPositioning)
+    dxDrawRectangle(x+radius, y, width-(radius*2), radius, color, postGUI, subPixelPositioning)
+end
 
 function drawInfo(text)
     if not isCursorShowing() then return end
@@ -58,7 +69,8 @@ function drawInfo(text)
 	local textWidth, textHeight = dxGetTextSize(text, width, 1, elements.font3, false)
     local mouse = Vector2(getCursorPosition())
     local cursorX, cursorY = mouse.x * SW, mouse.y * SH
-    dxDrawRectangle(cursorX + 17, cursorY + 17, width + 4, 5+textHeight, tocolor(128, 128, 128, 150),true)
+    dxDrawRoundedRectangle((cursorX + 17) - 10/zoom, (cursorY + 17) - 5/zoom, (width + 4) + 20/zoom, (5+textHeight) + 10/zoom, 10, tocolor(50, 50, 50, 255), true, false)
+    --dxDrawRectangle(cursorX + 17, cursorY + 17, width + 4, 5+textHeight, tocolor(128, 128, 128, 150),true)
     dxDrawText(text, cursorX + 19.10, cursorY + 20.6, 0, 0, 0xFFE1E1E1, 1, elements.font3, "left", "top", false, false,true)
 end
 
@@ -347,6 +359,18 @@ addEventHandler("onClientRender", root, function()
 	end
 end)
 
+addEvent("updateCow:Farm", true)
+addEventHandler("updateCow:Farm", resourceRoot, function(milk, id)
+    for _,v in ipairs(getElementsByType("object"))do
+        if getElementData(v, "Cow:Data") then
+            local data = getElementData(v, "Cow:Data")
+            if data.id == id then
+                data.milk = milk
+                setElementData(v, "Cow:Data", data)
+            end
+        end
+    end
+end)
 
 addEvent("import:Data:Farm", true)
 addEventHandler("import:Data:Farm", resourceRoot, function(pos, data)
@@ -571,11 +595,12 @@ addEventHandler("onClientClick", root, function(b, s, _,_,_,_,_, element)
                     setPedAnimation(localPlayer, "BOMBER", "BOM_Plant")
                     outputChatBox("Dojenie krowy...", 255, 255, 255)
                     elements.blocked = true
-                    setTimer(function(element, data, farm)
+                    setTimer(function(element, farm)
                         setElementPosition(localPlayer, x2,y2,z2)
                         setPedAnimation(localPlayer, false)
                         setElementFrozen(localPlayer, false)
                         elements.blocked = null
+                        data = getElementData(element,"Cow:Data")
                         for _,v in ipairs(getElementsByType("marker"))do
                             if getElementData(v,"Farm:Data") then
                                 if getElementData(v,"Farm:Data")["id"] == data["farm"] then
@@ -607,7 +632,7 @@ addEventHandler("onClientClick", root, function(b, s, _,_,_,_,_, element)
                         end
                         triggerServerEvent("dojenie:Farm", resourceRoot, data, minus_milk, plus_farm)
                         
-                    end, 3500, 1, element, data, farm)
+                    end, 3500, 1, element, farm)
                 else
                     outputChatBox("Podejdź bliżej krowy, jeśli chcesz ją wydoić!", 255, 255, 255)
                 end
