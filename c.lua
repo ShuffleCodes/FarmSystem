@@ -594,10 +594,11 @@ addEventHandler("onClientClick", root, function(b, s, _,_,_,_,_, element)
                         return
                     end
                     local tx, ty, tz = getPositionFromElementOffset(element, 0, 2, 0)
-                    local r = findRotation(tx, ty, x, y)
+                    
                     setElementFrozen(localPlayer, true)
                     setElementPosition(localPlayer, tx, ty, tz)
-                    setElementRotation(localPlayer, 0, 0, r)
+                    local r = findRotation(tx, ty, x, y)
+                    setElementRotation(localPlayer, 0, 0, r + 90)
                     setPedAnimation(localPlayer, "BOMBER", "BOM_Plant")
                     outputChatBox("Dojenie krowy...", 255, 255, 255)
                     elements.blocked = true
