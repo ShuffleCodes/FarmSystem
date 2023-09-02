@@ -593,7 +593,7 @@ addEventHandler("onClientClick", root, function(b, s, _,_,_,_,_, element)
                         outputChatBox("Krowa #"..(data.id).." nie ma mleka!", 255, 255, 255)
                         return
                     end
-                    local tx, ty, tz = getPositionFromElementOffset(element, 2, 0, 0)
+                    local tx, ty, tz = getPositionFromElementOffset(element, 0, 2, 0)
                     local r = findRotation(tx, ty, x, y)
                     setElementFrozen(localPlayer, true)
                     setElementPosition(localPlayer, tx, ty, tz)
