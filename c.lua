@@ -352,7 +352,7 @@ addEventHandler("onClientRender", root, function()
 			local x,y,z = getElementPosition(v)
 			if getDistanceBetweenPoints3D(x2,y2,z2,x,y,z)<20 then
 				if isLineOfSightClear(x,y,z,cx,cy,cz,false,true,false, false) then
-					local sx,sy = getScreenFromWorldPosition(x,y,z+0.4)
+					local sx,sy = getScreenFromWorldPosition(x,y,z)
 					if sx and sy then
                         local text = ""
                         data = getElementData(v,"Cow:Data")
