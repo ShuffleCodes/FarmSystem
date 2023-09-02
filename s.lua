@@ -30,6 +30,10 @@ function init(element)
     end
 end
 
+addCommandHandler("init", function(plr)
+    init(plr)
+end)
+
 
 addEvent("tpTo:Farm", true)
 addEventHandler("tpTo:Farm", resourceRoot, function(id, x, y, z, dim, typefarm)
@@ -52,6 +56,10 @@ addEventHandler("tpTo:Out", resourceRoot, function(x,y,z)
 end)
 
 
+addCommandHandler("tp", function(plr)
+    setElementPosition(plr, -2412.71924, -608.77301, 132.59628)
+    setElementDimension(plr, 0)
+end)
 
 
 addEvent("buyNew:Farm", true)

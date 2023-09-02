@@ -27,7 +27,9 @@
     <file src="img/arrow.png"/>
     <file src="img/light.png"/>
 
-
+    <file src="cow.txd"/>
+    <file src="cow.dff"/>
+    
     <map src="map/farm_map.map" dimension="-1"></map>
     <script src="map/mapEditorScriptingExtension_s.lua" type="server"></script>
     <script src="map/mapEditorScriptingExtension_c.lua" type="client" validate="false"></script>

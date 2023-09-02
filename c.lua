@@ -17,6 +17,11 @@ function isMouseInPosition ( x, y, width, height )
 	return ( ( cx >= x and cx <= x + width ) and ( cy >= y and cy <= y + height ) )
 end
 
+txd = engineLoadTXD( "cow.txd" )
+dff = engineLoadDFF( "cow.dff", 11470 )
+engineImportTXD( txd, 11470 )
+engineReplaceModel( dff, 11470 )
+
 elements = {
     font = dxCreateFont("font.otf", 22/zoom, false, "antialiased"),
     font2 = dxCreateFont("font.otf", 16/zoom, false, "antialiased"),
@@ -466,11 +471,11 @@ addEventHandler("tpTo:Farm", resourceRoot, function(cows_data, id, typefarm)
                     z = getGroundPosition(position.x, position.y, 131) + 0.9
                 end
                 local rot = math.random(0,360)
-                local obj = createObject(11470, position.x, position.y, z, 0, 0, rot)
+                local obj = createObject(11470, position.x, position.y, z + 0.5, 0, 0, rot)
                 setElementCollisionsEnabled(obj, false)
                 local temp = createObject(944, position.x, position.y, z, 0, 0, rot + 90)
                 setElementAlpha(temp, 0)
-                setObjectScale(obj, 0.3)
+                setObjectScale(obj, 1.5)
                 setElementDimension(obj, getElementDimension(localPlayer))
                 setElementDimension(temp, getElementDimension(localPlayer))
                 table.insert(elements.cows, obj)
@@ -587,7 +592,7 @@ addEventHandler("onClientClick", root, function(b, s, _,_,_,_,_, element)
                         outputChatBox("Krowa #"..(data.id).." nie ma mleka!", 255, 255, 255)
                         return
                     end
-                    local tx, ty, tz = getPositionFromElementOffset(element, 0, 2, 0)
+                    local tx, ty, tz = getPositionFromElementOffset(element, 2, 0, 0)
                     local r = findRotation(tx, ty, x, y)
                     setElementFrozen(localPlayer, true)
                     setElementPosition(localPlayer, tx, ty, tz)
